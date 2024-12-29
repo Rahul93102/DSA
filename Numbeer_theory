@@ -1,0 +1,136 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+using namespace std;
+
+#define ll long long
+#define vl vector<long long>
+#define pb push_back
+#define loop(i, n) for (ll i = 1; i <= n; i++)
+#define M 1000000
+ll mod = 1e9 + 7;
+
+// Utility function to print a vector
+void print(vector<ll>& v) {
+    for (auto i : v) {
+        cout << i << " ";
+    }
+    cout << endl;
+}
+
+// GCD function using subtraction method
+ll gcd(int a, int b) {
+    if (a == 0) return b;
+    if (b == 0) return a;
+    if (a == b) return a;
+    return (a > b) ? gcd(a - b, b) : gcd(a, b - a);
+}
+
+// Modular arithmetic for (a^b % mod) --> 
+ll modular_exponentiation(ll a, ll b) {
+    if (b == 0) return 1;
+    ll half = modular_exponentiation(a, b / 2);
+    if (b % 2 == 0) 
+        return (half * half) % mod;
+    else 
+        return ((a * half) % mod * half) % mod;
+}
+
+// Modular inverse using Fermat's little theorem
+ll modular_inverse(ll a) {
+    return modular_exponentiation(a, mod - 2); // Works when mod is prime
+}
+
+// Factorial calculation with modular arithmetic
+vector<ll> factorial;
+
+// Precompute factorials up to n
+void precompute_factorials(ll n) {
+    factorial.resize(n + 1, 1);
+    for (ll i = 2; i <= n; i++) {
+        factorial[i] = (factorial[i - 1] * i) % mod;
+    }
+}
+
+// Compute nCr % mod
+ll combination(ll n, ll r) {
+    if (r > n) return 0;
+    ll num = factorial[n];
+    ll denom = (factorial[r] * factorial[n - r]) % mod;
+    return (num * modular_inverse(denom)) % mod;
+}
+
+// Function to count divisors of a number
+ll cnt_div(ll n) {
+    ll cnt = 0;
+    for (ll i = 1; i * i <= n; i++) {
+        if (n % i == 0) {
+            cnt++;
+            if (n / i != i) cnt++;
+        }
+    }
+    return cnt;
+}
+
+// Function to calculate divisors count for all numbers 1 to n
+vector<ll> div_1_to_n(ll n) {
+    vector<ll> cnt(n + 1, 0);
+    for (ll i = 1; i <= n; i++) {
+        for (ll j = i; j <= n; j += i) {
+            cnt[j]++;
+        }
+    }
+    return cnt;
+}
+
+// Sieve of Eratosthenes to find prime numbers up to n
+vector<bool> sieve_of_eratoshenes(ll n) {
+    vector<bool> isprime(n + 1, true);
+    isprime[0] = isprime[1] = false;
+    for (ll i = 2; i * i <= n; i++) {
+        if (isprime[i]) {
+            for (ll j = i * i; j <= n; j += i) {
+                isprime[j] = false;
+            }
+        }
+    }
+    return isprime;
+}
+
+int main() {
+    ll n;
+    cout << "Enter n: ";
+    cin >> n;
+
+    // Precompute factorials for n
+    precompute_factorials(n);
+
+    // Divisors count for numbers 1 to n
+    vector<ll> divisors = div_1_to_n(n);
+
+    // Primality check for numbers up to n using sieve
+    vector<bool> isprime = sieve_of_eratoshenes(n);
+
+    // Print all prime numbers up to n
+    cout << "Prime numbers up to " << n << ":\n";
+    for (ll i = 2; i <= n; i++) {
+        if (isprime[i]) cout << i << " ";
+    }
+    cout << endl;
+
+    // Print divisors count for all numbers from 1 to n
+    cout << "\nDivisors count for numbers 1 to " << n << ":\n";
+    for (ll i = 1; i <= n; i++) {
+        cout << "Number " << i << ": " << divisors[i] << endl;
+    }
+
+    // Calculate combinations
+    ll r;
+    cout << "\nEnter n and r for combinations: ";
+    cin >> n >> r;
+    cout << "nCr = " << combination(n, r) << endl;
+
+    return 0;
+}
